@@ -1,6 +1,4 @@
-﻿using Flattery.Factories;
-
-namespace Flattery;
+﻿namespace Flattery;
 
 /// <summary>
 /// Builder capable of generating flat files

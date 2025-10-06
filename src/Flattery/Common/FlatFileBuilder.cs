@@ -20,7 +20,7 @@ public class FlatFileBuilder : IFlatFileBuilder
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Select(prop => (Property: prop, FieldAttribute: prop.GetCustomAttribute<FlatFieldAttribute>()))
             .Where(x => x.FieldAttribute is not null)
-            .Max(x => x.FieldAttribute!.End);
+            .Max(x => Convert.ToInt32(x.FieldAttribute!.End));
     }
 
     /// <inheritdoc />
@@ -71,10 +71,10 @@ public class FlatFileBuilder : IFlatFileBuilder
             // Copy data to correct index
             fieldAttribute
                 .FormatField(property.GetValue(record))
-                .CopyTo(stringSpan[(fieldAttribute.Start - 1)..fieldAttribute.End]);
+                .CopyTo(stringSpan[Convert.ToInt32(fieldAttribute.Start - 1)..Convert.ToInt32(fieldAttribute.End)]);
 
             previousPropertyName = property.Name;
-            previousEndPosition = fieldAttribute.End;
+            previousEndPosition = Convert.ToInt32(fieldAttribute.End);
         }
 
         // Add the resulting span to the string builder for when the dev wants an output

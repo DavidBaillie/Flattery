@@ -10,17 +10,17 @@ public abstract class FlatFieldAttribute : Attribute
     /// <summary>
     /// Starting array position of the elements in the resulting line of characters.
     /// </summary>
-    public int Start { get; private init; }
+    public uint Start { get; private init; }
 
     /// <summary>
     /// Ending (inclusive) array position of the elements in the resulting line of characters
     /// </summary>
-    public int End { get; private init; }
+    public uint End { get; private init; }
 
     /// <summary>
     /// Utility for retrieving the length of the underlying field.
     /// </summary>
-    protected int FieldLength => End - Start + 1;
+    protected uint FieldLength => End - Start + 1;
 
     /// <summary>
     /// Initializes a new instance of the attribute, ensuring that minimal constraints are upheld.
@@ -28,7 +28,7 @@ public abstract class FlatFieldAttribute : Attribute
     /// <param name="start">zero-indexed start position of the value in the output record</param>
     /// <param name="end">zero-indexed inclusive end position of the value in the output record.</param>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="end" /> is less than <paramref name="start" /> or if either value is negative.</exception>
-    protected FlatFieldAttribute(int start, int end)
+    protected FlatFieldAttribute(uint start, uint end)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(end, start);
         ArgumentOutOfRangeException.ThrowIfNegative(start, nameof(start));

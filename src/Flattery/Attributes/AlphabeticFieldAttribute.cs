@@ -1,4 +1,4 @@
-﻿using Flattery.Extensions;
+﻿using Flattery.Formatters;
 
 namespace Flattery.Attributes;
 
@@ -8,25 +8,10 @@ namespace Flattery.Attributes;
 /// </summary>
 /// <param name="start">Start position to write to in the output</param>
 /// <param name="end">End poisiton to write to in the output</param>
-internal sealed class AlphabeticFieldAttribute(int start, int end)
+internal sealed class AlphabeticFieldAttribute(uint start, uint end)
     : FlatFieldAttribute(start, end)
 {
     /// <inheritdoc />
     public override ReadOnlySpan<char> FormatField(object? value)
-    {
-        // Can't do anything with NULL
-        if (value is null)
-            return null;
-
-        // Attribute only applies to strings by definition of being an alphabetic field
-        if (value is not string stringValue)
-            throw new InvalidOperationException($"This attribute can only be applied to {nameof(String)}, but was applied to {value.GetType().Name}");
-
-        var result = stringValue
-            .AsSpan()
-            .Where(x => !char.IsAsciiDigit(x));
-
-        // Field may contain more characters than the flat file allows, in this case take the first N valid characters
-        return result[..Math.Min(FieldLength, result.Length)];
-    }
+        => AlphabeticFormatter.FormatAlphabeticSpan(value, FieldLength);
 }
