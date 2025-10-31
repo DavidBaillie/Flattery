@@ -45,6 +45,9 @@ internal static class NumericFormatter
     public static ReadOnlySpan<char> FormatIntegerSpan<T>(object? value, uint fixedLength)
         where T : IBinaryInteger<T>, ISignedNumber<T>
     {
+        // Min length must always be at least 2. 
+        // 1 position for sign, one position for a single digit
+        // Technically positive values could only need 1 position, but this implementation supports negatives. 
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual<uint>(fixedLength, 1, nameof(fixedLength));
 
         if (value is null)
@@ -53,7 +56,11 @@ internal static class NumericFormatter
         if (value is not T signedValue)
             throw new InvalidOperationException($"This attribute can only be applied to {typeof(T).Name}, but was applied to {value.GetType().Name}");
 
-        string formattedValue = signedValue.ToString($"D{fixedLength - 1}", CultureInfo.InvariantCulture);
+        // If the value is negative we need to reserve a single position for the signed value, otherwise 
+        // we pad the position with a 0 instead of the negative sign.
+        string formattedValue = signedValue.ToString($"D{(T.IsNegative(signedValue) ?
+            fixedLength - 1 :
+            fixedLength)}", CultureInfo.InvariantCulture);
 
         if (formattedValue.Length > fixedLength)
             throw new ArgumentOutOfRangeException($"Cannot format the value '{signedValue}' because it is larger than the allows space of {fixedLength} digits.");
