@@ -79,16 +79,12 @@ internal static class NumericFormatter
     /// <returns><see cref="ReadOnlySpan{T}"/> of <paramref name="fixedLength"/> characters</returns>
     /// <exception cref="InvalidOperationException">Thrown when the provided input is not of the required type</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the input or output values are not within the defined ranges.</exception>
-    public static ReadOnlySpan<char> FormatFloatingPointSpan<T>(object? value, uint fixedLength, uint integerDigits, uint decimalDigits)
+    public static ReadOnlySpan<char> FormatFloatingPointSpan<T>(object? value, uint fixedLength, uint decimalDigits)
         where T : IFloatingPoint<T>
     {
         // Why are you using this if you want one or both halves to be missing...?
-        ArgumentOutOfRangeException.ThrowIfZero(integerDigits, nameof(integerDigits));
         ArgumentOutOfRangeException.ThrowIfZero(decimalDigits, nameof(decimalDigits));
-
-        // Integer digits + decimal digits + decimal point + negative sign (maybe)
-        if (integerDigits + decimalDigits + 2 > fixedLength)
-            throw new InvalidOperationException("Cannot fit the requested number of digits and/or decimal into the designated number of characters.");
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(decimalDigits + 1, fixedLength, nameof(decimalDigits));
 
         if (value is null)
             return null;
@@ -96,9 +92,21 @@ internal static class NumericFormatter
         if (value is not T floatingPointValue)
             throw new InvalidOperationException($"This attribute can only be applied to {typeof(T).Name}, but was applied to {value.GetType().Name}");
 
+        // The user specifies a total length and the number of decimals they'd like to use. The resulting number of 
+        // integer digits available is the difference between the fixedLength and the decimal digits minus the decimal character
+        // and minus (possibly) the negative sign.
+        var integerDigits = fixedLength - decimalDigits - (T.IsNegative(floatingPointValue) ? 2u : 1u);
+
+        // Allow the formatter to generate a representation of the output according to the Floating Point format structure.
         var result = floatingPointValue.ToString($"F{decimalDigits}", CultureInfo.InvariantCulture);
 
-        if (result.Split('.')[0].Length > integerDigits)
+        // Read the integer characters from the generated string.
+        // If there are more characters than we can allow for in the output we throw an exception that the number is too large.
+        var positiveDigitsLength = result.Split('.')[0].Length;
+        if (T.IsNegative(floatingPointValue))
+            positiveDigitsLength--;
+
+        if (positiveDigitsLength > integerDigits)
             throw new ArgumentOutOfRangeException($"Cannot format the value '{floatingPointValue}' because it requires more integer digits than {integerDigits} for formatting.");
 
         // Jank formatting to deal with the negative sign and padding stuffs
@@ -107,11 +115,11 @@ internal static class NumericFormatter
             // If it's negative:
             // Remove the negative sign (first char) and then padd to N - 1 zeros
             // After padding, add the negative sign back to the very front
-            result = "-" + result[1..].PadLeft(Convert.ToInt32(integerDigits - 1), '0');
+            result = "-" + result[1..].PadLeft(Convert.ToInt32(fixedLength - 1), '0');
         }
         else
         {
-            result = result.PadLeft(Convert.ToInt32(integerDigits), '0');
+            result = result.PadLeft(Convert.ToInt32(fixedLength), '0');
         }
 
         return result;
