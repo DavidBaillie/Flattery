@@ -19,6 +19,34 @@ internal class FloatingPointNumberTests
             message: $"Expected Floating Point output to be [{output}] but received [{result.ToString()}]");
     }
 
+    [TestCase(1, 1u, 3u, "1.0")]
+    [TestCase(10, 1u, 4u, "10.0")]
+    [TestCase(100.23, 1u, 5u, "100.2")]
+    [TestCase(110.2345, 2u, 6u, "110.23")]
+    [TestCase(-110.2345, 2u, 7u, "-110.23")]
+    [TestCase(110.2345, 2u, 10u, "0000110.23")]
+    [TestCase(-110.2345, 2u, 10u, "-000110.23")]
+    public void FormatDoubleFloatingPointCreatesCorrectOutput(double input, uint decimalPlaces, uint fixedSize, string output)
+    {
+        var result = NumericFormatter.FormatFloatingPointSpan<double>(input, fixedSize, decimalPlaces);
+        Assert.That(output.Equals(result.ToString(), StringComparison.InvariantCulture),
+            message: $"Expected Floating Point output to be [{output}] but received [{result.ToString()}]");
+    }
+
+    [TestCase(1, 1u, 3u, "1.0")]
+    [TestCase(10, 1u, 4u, "10.0")]
+    [TestCase(100.23, 1u, 5u, "100.2")]
+    [TestCase(110.2345, 2u, 6u, "110.23")]
+    [TestCase(-110.2345, 2u, 7u, "-110.23")]
+    [TestCase(110.2345, 2u, 10u, "0000110.23")]
+    [TestCase(-110.2345, 2u, 10u, "-000110.23")]
+    public void FormatDecimalCreatesCorrectOutput(decimal input, uint decimalPlaces, uint fixedSize, string output)
+    {
+        var result = NumericFormatter.FormatFloatingPointSpan<decimal>(input, fixedSize, decimalPlaces);
+        Assert.That(output.Equals(result.ToString(), StringComparison.InvariantCulture),
+            message: $"Expected Floating Point output to be [{output}] but received [{result.ToString()}]");
+    }
+
     [TestCase(100f, 0u, 0u)]
     [TestCase(100f, 1u, 1u)]
     [TestCase(100f, 3u, 1u)]
