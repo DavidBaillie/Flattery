@@ -9,15 +9,14 @@ internal static class ValueFormatter
             return falseValue;
 
         if (value is not bool booleanValue)
-            throw new InvalidOperationException($"This attribute can only be applied to {nameof(Boolean)}, but was applied to {value.GetType().Name}");
+            throw new ArgumentException($"This attribute can only be applied to {nameof(Boolean)}, but was applied to {value.GetType().Name}");
 
-        if (trueValue.Length > fixedLength)
-            throw new InvalidOperationException($"Cannot fit trueValue value '{trueValue}' in the allocated field size of {fixedLength}");
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(Convert.ToUInt32(trueValue.Length), fixedLength, nameof(trueValue));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(Convert.ToUInt32(falseValue.Length), fixedLength, nameof(falseValue));
 
-        if (falseValue.Length > fixedLength)
-            throw new InvalidOperationException($"Cannot fit falseValue value '{falseValue}' in the allocated field size of {fixedLength}");
-
-        return booleanValue ? trueValue : falseValue;
+        return booleanValue ?
+            trueValue.PadRight(Convert.ToInt32(fixedLength)) :
+            falseValue.PadRight(Convert.ToInt32(fixedLength));
     }
 
 
