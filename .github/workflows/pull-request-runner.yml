@@ -8,7 +8,7 @@ on:
       - master
   
 jobs:
-  build:
+  build-flattery:
     name: Build Flattery
     uses: ./.github/workflows/build-project.yml
     with:
@@ -16,7 +16,7 @@ jobs:
       DOTNET_VERSION: '8.0.x'
       PROJECT_PATH: './src/Flattery/Flattery.csproj'
 
-  test:
+  test-flattery:
     name: Test Flattery
     uses: ./.github/workflows/run-test-suite.yml
     with:
