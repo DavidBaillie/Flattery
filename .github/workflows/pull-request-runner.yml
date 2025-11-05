@@ -1,0 +1,16 @@
+name: Pull Requests
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - master
+
+jobs:
+  build:
+    name: Build Flattery
+    uses: ./.github/workflows/build-project.yml
+
+  test:
+    name: Test Flattery
+    uses: ./.github/workflows/run-test-suite.yml
