@@ -1,4 +1,4 @@
-name: Pull Requests
+name: Pull Request Runner
 
 on:
   workflow_dispatch:
@@ -7,11 +7,25 @@ on:
       - dev
       - master
 
+env:
+  CONFIGURATION: Release
+  DOTNET_VERSION: '8.0.x'
+  FLATTERY_PROJECT: ./src/Flattery/Flattery.csproj
+  TEST_PROJECT: ./test/Flattery.Tests/Flattery.Tests.csproj
+  
 jobs:
   build:
     name: Build Flattery
     uses: ./.github/workflows/build-project.yml
+    with:
+      CONFIGURATION: ${{ env.CONFIGURATION }}
+      DOTNET_VERSION: ${{ env.DOTNET_VERSION }}
+      PROJECT_PATH: ${{ env.FLATTERY_PROJECT }}
 
   test:
     name: Test Flattery
     uses: ./.github/workflows/run-test-suite.yml
+    with:
+      CONFIGURATION: ${{ env.CONFIGURATION }}
+      DOTNET_VERSION: ${{ env.DOTNET_VERSION }}
+      PROJECT_PATH: ${{ env.TEST_PROJECT }}
