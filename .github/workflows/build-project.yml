@@ -33,6 +33,7 @@ on:
 
 jobs:
   test-generic-project:
+    name: Test Generic Project
     runs-on: ubuntu-latest
     
     steps:
