@@ -6,6 +6,7 @@ namespace Flattery.Tests.UnitTests.Formatters;
 internal class AlphabeticTests
 {
     [TestCase("alpha", int.MaxValue, "alpha")]
+    [TestCase("beta", int.MaxValue, "beta")]
     [TestCase("123123beta", int.MaxValue, "beta")]
     [TestCase("b3ta", int.MaxValue, "bta")]
     [TestCase("alpha", 3, "alp")]
