@@ -34,7 +34,7 @@ on:
 
 jobs:
   build-generic-project:
-    name: Build
+    name: Build Generic Project
     runs-on: ubuntu-latest
 
     steps:
