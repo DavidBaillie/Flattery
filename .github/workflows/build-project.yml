@@ -1,0 +1,48 @@
+name: Build Project
+
+on:
+  workflow_dispatch:
+    inputs: 
+      PROJECT_PATH:
+        description: 'Path to project to build.'
+        type: string
+        default: "./src/Flattery/Flattery.csproj"
+      DOTNET_VERSION:
+        description: 'Version of the .NET SDK to use.'
+        type: string
+        default: '8.0.x'
+      CONFIGURATION:
+        description: 'Build configuration to use.'
+        type: string
+        default: Release
+  workflow_call:
+    inputs:   
+      PROJECT_PATH:
+        description: 'Path to project to build.'
+        type: string
+        required: true
+      DOTNET_VERSION:
+        description: 'Version of the .NET SDK to use.'
+        type: string
+        required: true
+      CONFIGURATION:
+        description: 'Build configuration to use.'
+        type: string
+        required: false
+        default: Release
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Using .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ inputs.DOTNET_VERSION }}
+        
+      - name: Build
+        run: dotnet build ${{ inputs.PROJECT_PATH }} --configuration ${{ inputs.CONFIGURATION }}
