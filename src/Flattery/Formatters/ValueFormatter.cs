@@ -20,14 +20,13 @@ internal static class ValueFormatter
     }
 
 
-    public static ReadOnlySpan<char> FormatDateOnlySpan(object? value, uint fixedLength, string outputFormat)
+    public static ReadOnlySpan<char> FormatDateOnlySpan(object? value, string outputFormat)
     {
-        if (outputFormat.Length > fixedLength)
-            throw new InvalidOperationException($"Format string {outputFormat} is too long");
+        if (value is null)
+            return null;
 
-        if (value is null) return null;
         if (value is not DateOnly dateOnlyValue)
-            throw new InvalidOperationException($"This attribute can only be applied to {nameof(DateOnly)}, but was applied to {value.GetType().Name}");
+            throw new ArgumentException($"This attribute can only be applied to {nameof(DateOnly)}, but was applied to {value.GetType().Name}");
 
         return dateOnlyValue.ToString(outputFormat);
     }

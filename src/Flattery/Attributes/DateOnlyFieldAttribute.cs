@@ -11,5 +11,8 @@ internal sealed class DateOnlyFieldAttribute(uint start, uint end)
     public string Format { get; init; } = "yyyyMMdd";
 
     public override ReadOnlySpan<char> FormatField(object? value)
-        => ValueFormatter.FormatDateOnlySpan(value, FieldLength, Format);
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(Convert.ToUInt32(Format.Length), FieldLength, nameof(Format));
+        return ValueFormatter.FormatDateOnlySpan(value, Format);
+    }
 }
