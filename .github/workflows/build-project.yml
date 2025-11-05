@@ -32,7 +32,7 @@ on:
         default: Release
 
 jobs:
-  publish:
+  test-generic-project:
     runs-on: ubuntu-latest
     
     steps:
