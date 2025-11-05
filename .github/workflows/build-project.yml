@@ -43,9 +43,6 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ github.event.inputs.DOTNET_VERSION }}
-          
-      - name: Restore
-        run: dotnet restore ${{ github.event.inputs.PROJECT_PATH }}
         
       - name: Build
-        run: dotnet build ${{ github.event.inputs.PROJECT_PATH }} --configuration ${{ github.event.inputs.CONFIGURATION }} --no-restore
+        run: dotnet build ${{ github.event.inputs.PROJECT_PATH }} --configuration ${{ github.event.inputs.CONFIGURATION }}
