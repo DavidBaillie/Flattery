@@ -1,0 +1,127 @@
+﻿using System.Globalization;
+using System.Numerics;
+
+namespace Flattery.Formatters;
+
+internal static class NumericFormatter
+{
+    /// <summary>
+    /// Takes a value type that is unsigned and of some integer representation (no decimals) and formats it into the desired string of N length.
+    /// </summary>
+    /// <typeparam name="T">Type of non-signed integer to format</typeparam>
+    /// <param name="value">Value to format</param>
+    /// <param name="fixedLength">Fixed length of the resulting span</param>
+    /// <returns><see cref="ReadOnlySpan{T}"/> of <paramref name="fixedLength"/> characters</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the provided input is not of the required type</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the input or output values are not within the defined ranges.</exception>
+    public static ReadOnlySpan<char> FormatPositiveIntegerSpan<T>(object? value, uint fixedLength)
+        where T : IBinaryInteger<T>, IUnsignedNumber<T>
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(fixedLength, nameof(fixedLength));
+
+        if (value is null)
+            return null;
+
+        if (value is not T unsignedValue)
+            throw new InvalidOperationException($"This attribute can only be applied to {typeof(T).Name}, but was applied to {value.GetType().Name}");
+
+        string formattedValue = unsignedValue.ToString($"D{fixedLength}", CultureInfo.InvariantCulture);
+
+        if (formattedValue.Length > fixedLength)
+            throw new ArgumentOutOfRangeException($"Cannot format the value '{unsignedValue}' because it is larger than the allows space of {fixedLength} digits.");
+
+        return formattedValue;
+    }
+
+    /// <summary>
+    /// Takes a value type that is some signed integer representation and formats it into the desired string of N length
+    /// </summary>
+    /// <typeparam name="T">Type of signed integer value</typeparam>
+    /// <param name="value">Value to format</param>
+    /// <param name="fixedLength">Fixed length of the output</param>
+    /// <returns><see cref="ReadOnlySpan{T}"/> of <paramref name="fixedLength"/> characters.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the provided input is not of the required type</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the input or output values are not within the defined ranges.</exception>
+    public static ReadOnlySpan<char> FormatIntegerSpan<T>(object? value, uint fixedLength)
+        where T : IBinaryInteger<T>, ISignedNumber<T>
+    {
+        // Min length must always be at least 2. 
+        // 1 position for sign, one position for a single digit
+        // Technically positive values could only need 1 position, but this implementation supports negatives. 
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual<uint>(fixedLength, 1, nameof(fixedLength));
+
+        if (value is null)
+            return null;
+
+        if (value is not T signedValue)
+            throw new InvalidOperationException($"This attribute can only be applied to {typeof(T).Name}, but was applied to {value.GetType().Name}");
+
+        // If the value is negative we need to reserve a single position for the signed value, otherwise 
+        // we pad the position with a 0 instead of the negative sign.
+        string formattedValue = signedValue.ToString($"D{(T.IsNegative(signedValue) ?
+            fixedLength - 1 :
+            fixedLength)}", CultureInfo.InvariantCulture);
+
+        if (formattedValue.Length > fixedLength)
+            throw new ArgumentOutOfRangeException($"Cannot format the value '{signedValue}' because it is larger than the allows space of {fixedLength} digits.");
+
+        return formattedValue;
+    }
+
+    /// <summary>
+    /// Takes a floating point value and formats it into the desired string of N length
+    /// </summary>
+    /// <typeparam name="T">Type of floating point value to format</typeparam>
+    /// <param name="value">Value to format</param>
+    /// <param name="fixedLength">Fixed length of the output</param>
+    /// <param name="integerDigits">Number of allowed digits for the integer piece</param>
+    /// <param name="decimalDigits">Number of allowed digits for the decimal piece</param>
+    /// <returns><see cref="ReadOnlySpan{T}"/> of <paramref name="fixedLength"/> characters</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the provided input is not of the required type</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the input or output values are not within the defined ranges.</exception>
+    public static ReadOnlySpan<char> FormatFloatingPointSpan<T>(object? value, uint fixedLength, uint decimalDigits)
+        where T : IFloatingPoint<T>
+    {
+        // Why are you using this if you want one or both halves to be missing...?
+        ArgumentOutOfRangeException.ThrowIfZero(decimalDigits, nameof(decimalDigits));
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(decimalDigits + 1, fixedLength, nameof(decimalDigits));
+
+        if (value is null)
+            return null;
+
+        if (value is not T floatingPointValue)
+            throw new InvalidOperationException($"This attribute can only be applied to {typeof(T).Name}, but was applied to {value.GetType().Name}");
+
+        // The user specifies a total length and the number of decimals they'd like to use. The resulting number of 
+        // integer digits available is the difference between the fixedLength and the decimal digits minus the decimal character
+        // and minus (possibly) the negative sign.
+        var integerDigits = fixedLength - decimalDigits - (T.IsNegative(floatingPointValue) ? 2u : 1u);
+
+        // Allow the formatter to generate a representation of the output according to the Floating Point format structure.
+        var result = floatingPointValue.ToString($"F{decimalDigits}", CultureInfo.InvariantCulture);
+
+        // Read the integer characters from the generated string.
+        // If there are more characters than we can allow for in the output we throw an exception that the number is too large.
+        var positiveDigitsLength = result.Split('.')[0].Length;
+        if (T.IsNegative(floatingPointValue))
+            positiveDigitsLength--;
+
+        if (positiveDigitsLength > integerDigits)
+            throw new ArgumentOutOfRangeException($"Cannot format the value '{floatingPointValue}' because it requires more integer digits than {integerDigits} for formatting.");
+
+        // Jank formatting to deal with the negative sign and padding stuffs
+        if (result.StartsWith('-'))
+        {
+            // If it's negative:
+            // Remove the negative sign (first char) and then padd to N - 1 zeros
+            // After padding, add the negative sign back to the very front
+            result = "-" + result[1..].PadLeft(Convert.ToInt32(fixedLength - 1), '0');
+        }
+        else
+        {
+            result = result.PadLeft(Convert.ToInt32(fixedLength), '0');
+        }
+
+        return result;
+    }
+}
