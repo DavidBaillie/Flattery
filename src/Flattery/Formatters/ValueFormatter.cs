@@ -4,6 +4,9 @@ internal static class ValueFormatter
 {
     public static ReadOnlySpan<char> FormatBooleanSpan(object? value, uint fixedLength, string trueValue, string falseValue)
     {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(Convert.ToUInt32(trueValue.Length), fixedLength, nameof(trueValue));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(Convert.ToUInt32(falseValue.Length), fixedLength, nameof(falseValue));
+
         // NULL assumed to be false
         if (value is null)
             return falseValue;
@@ -11,12 +14,7 @@ internal static class ValueFormatter
         if (value is not bool booleanValue)
             throw new ArgumentException($"This attribute can only be applied to {nameof(Boolean)}, but was applied to {value.GetType().Name}");
 
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(Convert.ToUInt32(trueValue.Length), fixedLength, nameof(trueValue));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(Convert.ToUInt32(falseValue.Length), fixedLength, nameof(falseValue));
-
-        return booleanValue ?
-            trueValue.PadRight(Convert.ToInt32(fixedLength)) :
-            falseValue.PadRight(Convert.ToInt32(fixedLength));
+        return booleanValue ? trueValue : falseValue;
     }
 
 
