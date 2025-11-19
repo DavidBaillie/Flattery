@@ -1,6 +1,5 @@
 ﻿using Flattery.Attributes;
 using System.Reflection;
-using System.Text;
 
 namespace Flattery;
 
@@ -10,7 +9,7 @@ namespace Flattery;
 /// </summary>
 public class FlatFileBuilder : IFlatFileBuilder
 {
-    private readonly StringBuilder currentFileStringBuilder = new();
+    private readonly List<string> allRecords = [];
 
     /// <inheritdoc />
     public virtual int GetRecordLength(object record)
@@ -54,9 +53,10 @@ public class FlatFileBuilder : IFlatFileBuilder
         var previousPropertyName = string.Empty;
         var previousEndPosition = -1;
 
-        // Allocate a span on the stack to use for building the string.
-        // This saves a HEAP allocation for the building phase before generating the string that will be returned.
-        Span<char> stringSpan = stackalloc char[fixedRowLength];
+        // Allocate a span on the stack so that we have a fixed piece of memory to work with 
+        // while parsing the properties into a fixed string structure. Once work is done on this 
+        // piece of memory we can allocate a space on the heap for storage based on the users needs.
+        Span<char> stringSpan = stackalloc char[fixedRowLength + 1];
         stringSpan.Fill(' ');
 
         foreach (var (property, fieldAttribute) in fieldsInRecord)
@@ -71,29 +71,27 @@ public class FlatFileBuilder : IFlatFileBuilder
             // Copy data to correct index
             fieldAttribute
                 .FormatField(property.GetValue(record))
-                .CopyTo(stringSpan[Convert.ToInt32(fieldAttribute.Start - 1)..Convert.ToInt32(fieldAttribute.End)]);
+                .CopyTo(stringSpan[Convert.ToInt32(fieldAttribute.Start)..Convert.ToInt32(fieldAttribute.End + 1)]);
 
             previousPropertyName = property.Name;
             previousEndPosition = Convert.ToInt32(fieldAttribute.End);
         }
 
         // Add the resulting span to the string builder for when the dev wants an output
-        currentFileStringBuilder.EnsureCapacity(currentFileStringBuilder.Length + fixedRowLength + 1);
-        currentFileStringBuilder.Append(stringSpan).Append('\n');
-
+        allRecords.Add(stringSpan.ToString());
         return this;
     }
 
     /// <inheritdoc />
     public virtual FlatFileBuilder Clear()
     {
-        currentFileStringBuilder.Clear();
+        allRecords.Clear();
         return this;
     }
 
     /// <inheritdoc />
     public virtual string Build()
     {
-        return currentFileStringBuilder.ToString();
+        return string.Join("\n", allRecords);
     }
 }
