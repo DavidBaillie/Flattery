@@ -15,9 +15,9 @@ internal class BooleanTests
 
     [TestCase(true, 2u, "Tr", "Fa", "Tr")]
     [TestCase(false, 2u, "Tr", "Fa", "Fa")]
-    [TestCase(true, 5u, "Tr", "Fa", "Tr   ")]
-    [TestCase(false, 5u, "Tr", "Fa", "Fa   ")]
-    [TestCase(true, 5u, "True", "False", "True ")]
+    [TestCase(true, 5u, "Tr", "Fa", "Tr")]
+    [TestCase(false, 5u, "Tr", "Fa", "Fa")]
+    [TestCase(true, 5u, "True", "False", "True")]
     [TestCase(false, 5u, "True", "False", "False")]
     public void FormatBooleanCreatesCorrectCustomOutput(bool input, uint fixedLength, string trueValue, string falseValue, string output)
     {
