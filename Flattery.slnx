@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/Flattery/Flattery.csproj" />
+  <Project Path="test/Flattery.Tests/Flattery.Tests.csproj" />
+</Solution>
