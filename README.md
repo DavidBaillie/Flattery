@@ -125,7 +125,7 @@ Fields must not overlap, and the positions determine the fixed-width layout of e
 Position:  0         1         2
            0123456789012345678901
            John       0251500.75Y
-           └─┬──┘    └─┬──┘ └──┬──┘
+           └─┬──────┘└─┬───────┘|
              |          |       └─ BooleanField (21-21)
              |          └─ FloatingPointField (14-20)
              └─ AlphabeticField (0-10)
