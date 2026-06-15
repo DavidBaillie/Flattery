@@ -201,10 +201,13 @@ catch (InvalidOperationException ex)
 - **Span-Based Formatting**: Minimizes allocations during string conversion
 - **Fixed-Width Format**: Optimized for high-volume record processing
 
-## Requirements
+## Supports
 
-- .NET 8.0 or later
-- C# 11 or later
+- .NET 6
+- .NET 7
+- .NET 8
+- .NET 9
+- .NET 10
 
 ## Notes
 
