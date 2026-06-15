@@ -209,8 +209,6 @@ catch (InvalidOperationException ex)
 - .NET 9
 - .NET 10
 
-## Notes
-
 ## License
 
 See [LICENSE.txt](LICENSE.txt) for details.
