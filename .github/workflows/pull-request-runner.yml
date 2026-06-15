@@ -9,17 +9,13 @@ on:
     branches:
       - master
 
-env:
-  DOTNET_VERSIONS: |
-    8.0.x
-    10.0.x
 
 jobs:
   build-flattery:
     name: Build Flattery (${{ matrix.dotnet-version }})
     strategy:
       matrix:
-        dotnet-version: ['8.0.x', '10.0.x']
+        dotnet-version: &dotnet-versions ['6.0.x', '7.0.x', '8.0.x', '9.0.x', '10.0.x']
     uses: ./.github/workflows/build-project.yml
     with:
       CONFIGURATION: Release
@@ -30,7 +26,7 @@ jobs:
     name: Test Flattery (${{ matrix.dotnet-version }})
     strategy:
       matrix:
-        dotnet-version: ['8.0.x', '10.0.x']
+        dotnet-version: *dotnet-versions
     uses: ./.github/workflows/run-test-suite.yml
     with:
       CONFIGURATION: Release
