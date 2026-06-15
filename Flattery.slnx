@@ -1,0 +1,7 @@
+<Solution>
+  <Properties>
+    <DefaultTargetFramework>net10.0</DefaultTargetFramework>
+  </Properties>
+  <Project Path="src/Flattery/Flattery.csproj" />
+  <Project Path="test/Flattery.Tests/Flattery.Tests.csproj" />
+</Solution>
